@@ -11,13 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('account_statements', function (Blueprint $table) {
+        Schema::create('form_multiple_uploads', function (Blueprint $table) {
             $table->id();
-            $table->dateTime('posting_date');
-            $table->string('account_owner');
-            $table->text('remark');
-            $table->string('reference')->nullable();
-            $table->integer('credit');
+            $table->string('to');
+            $table->string('cc')->nullable();
+            $table->string('subject');
+            $table->json('attachments');
             $table->timestamps();
         });
     }
@@ -27,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('account_statements');
+        Schema::dropIfExists('form_multiple_uploads');
     }
 };

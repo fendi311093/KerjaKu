@@ -10,6 +10,7 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateFormMultipleUpload extends CreateRecord
 {
     protected static string $resource = FormMultipleUploadResource::class;
+    protected static ?string $title = '';
 
     protected function getRedirectUrl(): string
     {
@@ -18,6 +19,6 @@ class CreateFormMultipleUpload extends CreateRecord
 
     protected function afterCreate(): void
     {
-        SendEmailJob::dispatch($this->record);
+        //
     }
 }

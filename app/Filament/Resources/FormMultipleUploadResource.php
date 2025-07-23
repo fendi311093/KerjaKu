@@ -14,8 +14,10 @@ use Filament\Forms\Form;
 use Filament\Infolists\Components\Section as ComponentsSection;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -24,7 +26,9 @@ class FormMultipleUploadResource extends Resource
 {
     protected static ?string $model = FormMultipleUpload::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-envelope';
+    protected static ?string $navigationLabel = 'E-Mail Uploads';
+    protected static ?string $pluralLabel = 'List of E-Mail';
 
     public static function form(Form $form): Form
     {
@@ -89,7 +93,15 @@ class FormMultipleUploadResource extends Resource
                     ->circular()
                     ->stacked()
                     ->ring(10)
-                    ->hiddenFrom('md'),
+                    ->toggleable(isToggledHiddenByDefault: true),
+                IconColumn::make('status_sent')
+                    ->label('Sent')
+                    ->icon(fn($record) => $record->status_sent ? 'heroicon-o-check-circle' : 'heroicon-o-x-circle'),
+                TextColumn::make('sent_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->placeholder('-')
+                    ->formatStateUsing(fn($state) => $state ? $state->format('d M Y H:i') : '-'),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -110,7 +122,10 @@ class FormMultipleUploadResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->emptyStateHeading('No Email Uploads Found')
+            ->emptyStateDescription('You have not uploaded any emails yet.')
+            ->emptyStateIcon('heroicon-o-envelope');
     }
 
     public static function getRelations(): array

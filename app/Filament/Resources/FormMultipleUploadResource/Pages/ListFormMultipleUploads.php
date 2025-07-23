@@ -13,7 +13,9 @@ class ListFormMultipleUploads extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()
+                ->label('New Email')
+                ->icon('heroicon-o-plus'),
         ];
     }
 }

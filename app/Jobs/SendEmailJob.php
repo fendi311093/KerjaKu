@@ -31,5 +31,10 @@ class SendEmailJob implements ShouldQueue
     public function handle(): void
     {
         Mail::send(new SendMultipleUploadMail($this->formMultipleUpload));
+
+        $this->formMultipleUpload->update([
+            'status_sent' => true,
+            'sent_at' => now(),
+        ]);
     }
 }

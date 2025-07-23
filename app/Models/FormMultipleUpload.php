@@ -19,17 +19,16 @@ class FormMultipleUpload extends Model
     protected $casts = [
         'attachments' => 'array',
         'sent_at' => 'datetime',
-        'status_sent' => 'boolean',
     ];
 
     protected static function booted()
     {
         parent::booted();
 
-        static::created(function ($moodel) {
+        static::created(function ($model) {
 
             // Dispatch the email job after creating the record
-            dispatch((new SendEmailJob($moodel))->delay(now()->addMinutes(2)));
+            dispatch((new SendEmailJob($model))->delay(now()->addMinutes(2)));
             // Log::info("Email job dispatched for model ID: {$moodel->id}");
         });
 
@@ -41,6 +40,16 @@ class FormMultipleUpload extends Model
                     static::deleteAttachments($originalAttachments);
                 }
             }
+
+            // Cek jika status diubah menjadi 'Re-Send'
+            if ($model->isDirty('status_sent') && $model->status_sent === 'Re-Send') {
+                // Kirim ulang email jika statusnya 'Re-Send'
+                dispatch((new SendEmailJob($model))->delay(now()->addMinutes(2)));
+            }
+        });
+
+        static::deleted(function ($model) {
+            static::deleteAttachments($model->attachments);
         });
     }
 

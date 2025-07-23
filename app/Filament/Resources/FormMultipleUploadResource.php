@@ -9,6 +9,7 @@ use Filament\Forms;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Infolists\Components\Section as ComponentsSection;
@@ -32,6 +33,10 @@ class FormMultipleUploadResource extends Resource
 
     public static function form(Form $form): Form
     {
+
+        // Closure halaman Edit Email
+        $isEditEmail = fn($livewire) => $livewire instanceof Pages\EditFormMultipleUpload;
+
         return $form
             ->schema([
                 Section::make('Email Details')->schema([
@@ -45,6 +50,23 @@ class FormMultipleUploadResource extends Resource
                             ->maxLength(255)
                             ->email()
                             ->placeholder('Optional CC email address'),
+                        Select::make('status_sent')
+                            ->options(function ($livewire) use ($isEditEmail) {
+                                return $isEditEmail($livewire)
+                                    ? [
+                                        'Delivered' => 'Delivered',
+                                        'Re-Send' => 'Re-Send',
+                                    ]
+                                    : [
+                                        'Pending' => 'Pending',
+                                        'Delivered' => 'Delivered',
+                                        'Re-Send' => 'Re-Send',
+                                    ];
+                            })
+                            ->default('Pending')
+                            ->label('Status')
+                            ->visible($isEditEmail)
+                            ->required(),
                     ]),
                     TextInput::make('subject')
                         ->required()
@@ -65,7 +87,7 @@ class FormMultipleUploadResource extends Resource
                             ->maxSize(10240) // 10 MB
                             ->required()
                             ->image()
-                            ->previewable(false),
+                            ->previewable($isEditEmail),
                     ])
             ])
             ->columns(1);
@@ -94,9 +116,14 @@ class FormMultipleUploadResource extends Resource
                     ->stacked()
                     ->ring(10)
                     ->toggleable(isToggledHiddenByDefault: true),
-                IconColumn::make('status_sent')
-                    ->label('Sent')
-                    ->icon(fn($record) => $record->status_sent ? 'heroicon-o-check-circle' : 'heroicon-o-x-circle'),
+                TextColumn::make('status_sent')
+                    ->label('Status')
+                    ->badge()
+                    ->color(fn(string $state): string => match ($state) {
+                        'Pending' => 'warning',
+                        'Delivered' => 'success',
+                        'Re-Send' => 'danger',
+                    }),
                 TextColumn::make('sent_at')
                     ->dateTime()
                     ->sortable()
@@ -123,6 +150,7 @@ class FormMultipleUploadResource extends Resource
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ])
+            ->recordUrl(null)
             ->emptyStateHeading('No Email Uploads Found')
             ->emptyStateDescription('You have not uploaded any emails yet.')
             ->emptyStateIcon('heroicon-o-envelope');

@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('cc')->nullable();
             $table->string('subject');
             $table->json('attachments');
-            $table->boolean('status_sent')->default(false);
+            $table->enum('status_sent', ['Pending', 'Delivered', 'Re-Send'])->default('pending');
             $table->dateTime('sent_at')->nullable();
             $table->timestamps();
         });

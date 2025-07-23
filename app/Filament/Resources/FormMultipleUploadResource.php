@@ -14,6 +14,7 @@ use Filament\Forms\Form;
 use Filament\Infolists\Components\Section as ComponentsSection;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -32,19 +33,20 @@ class FormMultipleUploadResource extends Resource
                 Section::make('Email Details')->schema([
                     Grid::make(2)->schema([
                         TextInput::make('to')
-                        ->required()
-                        ->default('fendi.toro@gmail.com')
-                        ->disabled()
-                        ->dehydrated(),
-                    TextInput::make('cc')
-                        ->maxLength(255)
-                        ->email()
-                        ->placeholder('Optional CC email address'),
+                            ->required()
+                            ->default('fendi.toro@gmail.com')
+                            ->disabled()
+                            ->dehydrated(),
+                        TextInput::make('cc')
+                            ->maxLength(255)
+                            ->email()
+                            ->placeholder('Optional CC email address'),
                     ]),
                     TextInput::make('subject')
                         ->required()
                         ->maxLength(255)
-                        ->placeholder('Example: SKHU1234567 IN'),
+                        ->placeholder('Example: SKHU1234567 IN')
+                        ->dehydrateStateUsing(fn($state) => strtoupper($state)),
                 ]),
                 Section::make()
                     ->description('Maximum 40 files, each up to 10 MB in size.')
@@ -52,14 +54,14 @@ class FormMultipleUploadResource extends Resource
                     ->iconColor('primary')
                     ->schema([
                         FileUpload::make('attachments')
-                        ->multiple()
-                        ->disk('public')
-                        ->directory('attachments')
-                        ->maxFiles(40)
-                        ->maxSize(10240) // 10 MB
-                        ->required()
-                        ->image()
-                        ->previewable(false),
+                            ->multiple()
+                            ->disk('public')
+                            ->directory('attachments')
+                            ->maxFiles(40)
+                            ->maxSize(10240) // 10 MB
+                            ->required()
+                            ->image()
+                            ->previewable(false),
                     ])
             ])
             ->columns(1);
@@ -70,11 +72,24 @@ class FormMultipleUploadResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('to')
+                    ->label('To Email Address')
+                    ->icon('heroicon-o-envelope')
+                    ->iconColor('primary')
                     ->searchable(),
                 TextColumn::make('cc')
+                    ->searchable()
+                    ->icon('heroicon-o-envelope')
+                    ->iconColor('primary')
+                    ->placeholder('-')
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('subject')
                     ->searchable(),
-                    TextColumn::make('subject')
-                    ->searchable(),
+                ImageColumn::make('attachments')
+                    ->label('Photos')
+                    ->circular()
+                    ->stacked()
+                    ->ring(10)
+                    ->hiddenFrom('md'),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -84,6 +99,7 @@ class FormMultipleUploadResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->defaultSort('updated_at', 'desc')
             ->filters([
                 //
             ])

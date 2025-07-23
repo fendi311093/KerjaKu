@@ -17,6 +17,10 @@ return new class extends Migration
             $table->string('cc')->nullable();
             $table->string('subject');
             $table->json('attachments');
+            $table->boolean('status_sent')->default(false);
+            $table->boolean('status_received')->default(false);
+            $table->dateTime('sent_at')->nullable();
+            $table->dateTime('received_at')->nullable();
             $table->timestamps();
         });
     }

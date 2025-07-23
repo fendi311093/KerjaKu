@@ -11,9 +11,17 @@ class FormMultipleUpload extends Model
         'cc',
         'subject',
         'attachments',
+        'status_sent',
+        'status_received',
+        'sent_at',
+        'received_at'
     ];
 
     protected $casts = [
         'attachments' => 'array',
+        'sent_at' => 'datetime',
+        'received_at' => 'datetime',
+        'status_sent' => 'boolean',
+        'status_received' => 'boolean'
     ];
 }

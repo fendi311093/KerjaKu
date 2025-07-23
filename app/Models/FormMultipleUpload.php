@@ -8,8 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class FormMultipleUpload extends Model
 {
     protected $fillable = [
-        'to',
-        'cc',
+        'to_email_address_id',
+        'cc_email_address_id',
         'subject',
         'attachments',
         'status_sent',

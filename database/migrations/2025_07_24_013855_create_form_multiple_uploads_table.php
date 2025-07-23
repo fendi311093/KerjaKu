@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('form_multiple_uploads', function (Blueprint $table) {
             $table->id();
-            $table->string('to');
-            $table->string('cc')->nullable();
+            $table->foreignId('to_email_address_id')->constrained('email_addresses')->cascadeOnUpdate();
+            $table->foreignId('cc_email_address_id')->nullable()->constrained('email_addresses')->cascadeOnUpdate();
             $table->string('subject');
             $table->json('attachments');
             $table->enum('status_sent', ['Pending', 'Delivered', 'Re-Send'])->default('pending');

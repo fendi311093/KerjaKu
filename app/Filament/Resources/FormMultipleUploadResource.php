@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\FormMultipleUploadResource\Pages;
 use App\Filament\Resources\FormMultipleUploadResource\RelationManagers;
+use App\Models\EmailAddress;
 use App\Models\FormMultipleUpload;
 use Filament\Forms;
 use Filament\Forms\Components\FileUpload;
@@ -31,25 +32,34 @@ class FormMultipleUploadResource extends Resource
     protected static ?string $navigationLabel = 'E-Mail Uploads';
     protected static ?string $pluralLabel = 'List of E-Mail';
 
+    protected static ?array $cachedEmailAddresses = null;
+
     public static function form(Form $form): Form
     {
 
         // Closure halaman Edit Email
         $isEditEmail = fn($livewire) => $livewire instanceof Pages\EditFormMultipleUpload;
 
+        // Cache email addresses
+        if (static::$cachedEmailAddresses === null) {
+            static::$cachedEmailAddresses = EmailAddress::getOptionsEmail();
+        }
+
         return $form
             ->schema([
                 Section::make('Email Details')->schema([
                     Grid::make(2)->schema([
-                        TextInput::make('to')
-                            ->required()
-                            ->default('fendi.toro@gmail.com')
-                            ->disabled()
-                            ->dehydrated(),
-                        TextInput::make('cc')
-                            ->maxLength(255)
-                            ->email()
-                            ->placeholder('Optional CC email address'),
+                        Select::make('to_email_address_id')
+                            ->label('To Email Address')
+                            ->options(static::$cachedEmailAddresses)
+                            ->searchable()
+                            ->preload()
+                            ->required(),
+                        Select::make('cc_email_address_id')
+                            ->label('CC Email Address')
+                            ->options(static::$cachedEmailAddresses)
+                            ->searchable()
+                            ->preload(),
                         Select::make('status_sent')
                             ->options(function ($livewire) use ($isEditEmail) {
                                 return $isEditEmail($livewire)

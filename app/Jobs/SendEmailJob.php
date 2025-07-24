@@ -9,6 +9,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class SendEmailJob implements ShouldQueue
@@ -30,12 +31,22 @@ class SendEmailJob implements ShouldQueue
      */
     public function handle(): void
     {
-        Mail::send(new SendMultipleUploadMail($this->formMultipleUpload));
+        Log::info('Attempting to send email for form ID: ' . $this->formMultipleUpload->id);
 
-        $this->formMultipleUpload->update([
-            'status_sent' => 'Delivered',
-            'sent_at' => now(),
-        ]);
+        try {
+            Mail::send(new SendMultipleUploadMail($this->formMultipleUpload));
+
+            $this->formMultipleUpload->update([
+                'status_sent' => 'Delivered',
+                'sent_at' => now(),
+            ]);
+
+            Log::info('Email sent successfully for form ID: ' . $this->formMultipleUpload->id);
+        } catch (\Exception $e) {
+            Log::error('Failed to send email for form ID: ' . $this->formMultipleUpload->id . ' due to connection error: ' . $e->getMessage());
+            // Re-throw the exception so the failed() method is called
+            throw $e;
+        }
     }
 
     /**
@@ -50,5 +61,7 @@ class SendEmailJob implements ShouldQueue
             'status_sent' => 'Failed',
             'sent_at' => now(),
         ]);
+
+        Log::error('Job SendEmailJob failed for form ID: ' . $this->formMultipleUpload->id . ' with error: ' . $exception->getMessage());
     }
 }

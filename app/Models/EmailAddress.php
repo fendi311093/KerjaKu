@@ -42,4 +42,44 @@ class EmailAddress extends Model
                 ->toArray();
         });
     }
+
+    public static function validateUniqueName($email, $ignoreId = null)
+    {
+        $normalizedValue = preg_replace('/\s+/', '', $email);
+        $query = static::whereRaw('REPLACE(email, " ", "") = ?', [$normalizedValue]);
+
+        if ($ignoreId) {
+            $query->where('id', '!=', $ignoreId);
+        }
+
+        return !$query->exists();
+    }
+
+    // Validation Rules
+    public static function validationRules($record = null): array
+    {
+        return [
+            'email' => [
+                'required',
+                'email',
+                'max:100',
+                function ($attribute, $value, $fail) use ($record) {
+                    if (!self::validateUniqueName($value, $record?->id)) {
+                        $fail('This email address already exists.');
+                    }
+                }
+            ]
+        ];
+    }
+
+    public static function getValidationMesages(): array
+    {
+        return [
+            'email' => [
+                'required' => 'The email address field is required.',
+                'email' => 'The email address must be a valid email format and the first letter must not contain spaces.',
+                'max' => 'The email address may not be greater than 100 characters.'
+            ]
+        ];
+    }
 }

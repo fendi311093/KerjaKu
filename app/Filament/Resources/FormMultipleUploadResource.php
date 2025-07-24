@@ -55,11 +55,13 @@ class FormMultipleUploadResource extends Resource
                             ->searchable()
                             ->preload()
                             ->required(),
-                        Select::make('cc_email_address_id')
-                            ->label('CC Email Address')
-                            ->options(static::$cachedEmailAddresses)
+                        Select::make('ccEmailAddresses') // Menggunakan Relasi ccEmailAddresses di model FormMultipleUpload
+                            ->label('CC Email Addresses')
+                            ->relationship('ccEmailAddresses', 'email')
+                            ->multiple()
                             ->searchable()
-                            ->preload(),
+                            ->preload()
+                            ->placeholder('Select CC Email Addresses'),
                         Select::make('status_sent')
                             ->options(function ($livewire) use ($isEditEmail) {
                                 return $isEditEmail($livewire)
@@ -105,12 +107,21 @@ class FormMultipleUploadResource extends Resource
 
     public static function table(Table $table): Table
     {
+
+        if (static::$cachedEmailAddresses === null) {
+            static::$cachedEmailAddresses = EmailAddress::getOptionsEmail();
+        }
+
         return $table
             ->columns([
-                TextColumn::make('to')
+                TextColumn::make('No')
+                    ->label('No')
+                    ->rowIndex(),
+                TextColumn::make('to_email_address_id')
                     ->label('To Email Address')
                     ->icon('heroicon-o-envelope')
                     ->iconColor('primary')
+                    ->formatstateUsing(fn($state) => static::$cachedEmailAddresses[$state] ?? '-')
                     ->searchable(),
                 TextColumn::make('cc')
                     ->searchable()
@@ -132,7 +143,8 @@ class FormMultipleUploadResource extends Resource
                     ->color(fn(string $state): string => match ($state) {
                         'Pending' => 'warning',
                         'Delivered' => 'success',
-                        'Re-Send' => 'danger',
+                        'Re-Send' => 'primary',
+                        'Failed' => 'danger',
                     }),
                 TextColumn::make('sent_at')
                     ->dateTime()

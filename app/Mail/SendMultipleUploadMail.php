@@ -30,8 +30,8 @@ class SendMultipleUploadMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            to: $this->formMultipleUpload->to,
-            cc: $this->formMultipleUpload->cc,
+            to: $this->formMultipleUpload->toEmailAddress->email,
+            cc: $this->formMultipleUpload->ccEmailAddresses->pluck('email')->all(),
             subject: $this->formMultipleUpload->subject,
         );
     }

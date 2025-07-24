@@ -9,7 +9,6 @@ class FormMultipleUpload extends Model
 {
     protected $fillable = [
         'to_email_address_id',
-        'cc_email_address_id',
         'subject',
         'attachments',
         'status_sent',
@@ -20,6 +19,22 @@ class FormMultipleUpload extends Model
         'attachments' => 'array',
         'sent_at' => 'datetime',
     ];
+
+    public function toEmailAddress()
+    {
+        return $this->belongsTo(EmailAddress::class, 'to_email_address_id');
+    }
+
+
+    public function ccEmailAddresses()
+    {
+        return $this->belongsToMany(
+            EmailAddress::class,
+            'form_multiple_upload_cc', // nama tabel pivot 
+            'form_multiple_upload_id', // Foreign Key dari Table Form Multiple Upload
+            'email_address_id'
+        );
+    }
 
     protected static function booted()
     {

@@ -37,4 +37,18 @@ class SendEmailJob implements ShouldQueue
             'sent_at' => now(),
         ]);
     }
+
+    /**
+     * Handle a job failure.
+     *
+     * @param  \Throwable  $exception
+     * @return void
+     */
+    public function failed(\Throwable $exception)
+    {
+        $this->formMultipleUpload->update([
+            'status_sent' => 'Failed',
+            'sent_at' => now(),
+        ]);
+    }
 }

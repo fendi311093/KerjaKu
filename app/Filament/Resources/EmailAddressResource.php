@@ -32,9 +32,8 @@ class EmailAddressResource extends Resource
             ->schema([
                 TextInput::make('email')
                     ->label('Email Address')
-                    ->required()
-                    ->email()
-                    ->maxLength(255),
+                    ->rules(fn($record) => EmailAddress::validationRules($record)['email'])
+                    ->validationMessages(EmailAddress::getValidationMesages()['email']),
                 Toggle::make('is_active')
                     ->label('Is Active')
                     ->default(true)
@@ -50,10 +49,21 @@ class EmailAddressResource extends Resource
     {
         return $table
             ->columns([
+                TextColumn::make('No')
+                    ->label('No')
+                    ->rowIndex(),
                 TextColumn::make('email')
                     ->label('Email Address')
+                    ->icon('heroicon-o-at-symbol')
+                    ->iconColor('success')
                     ->searchable()
                     ->sortable(),
+                ToggleColumn::make('is_active')
+                    ->label('Is Active')
+                    ->onIcon('heroicon-o-check-circle')
+                    ->offIcon('heroicon-o-x-circle')
+                    ->onColor('success')
+                    ->offColor('danger'),
             ])
             ->filters([
                 //
@@ -66,7 +76,11 @@ class EmailAddressResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->recordUrl(null)
+            ->emptyStateHeading('No Email Addresses Found')
+            ->emptyStateDescription('You have not added any email addresses yet.')
+            ->emptyStateIcon('heroicon-o-at-symbol');
     }
 
     public static function getPages(): array

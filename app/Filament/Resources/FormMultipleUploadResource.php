@@ -68,6 +68,7 @@ class FormMultipleUploadResource extends Resource
                                     ? [
                                         'Delivered' => 'Delivered',
                                         'Re-Send' => 'Re-Send',
+                                        'Failed' => 'Failed',
                                     ]
                                     : [
                                         'Pending' => 'Pending',

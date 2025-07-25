@@ -9,6 +9,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class SendEmailJob implements ShouldQueue
@@ -46,6 +47,12 @@ class SendEmailJob implements ShouldQueue
      */
     public function failed(\Throwable $exception)
     {
+        // Log the actual exception message for debugging
+        Log::error('Email sending failed for FormMultipleUpload ID: ' . $this->formMultipleUpload->id, [
+            'error' => $exception->getMessage(),
+            'trace' => $exception->getTraceAsString(), // Optional, but very helpful
+        ]);
+
         $this->formMultipleUpload->update([
             'status_sent' => 'Failed',
             'sent_at' => now(),

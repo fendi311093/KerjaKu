@@ -14,7 +14,7 @@ return [
     |
     */
 
-    'default' => env('MAIL_MAILER', 'log'),
+    'default' => env('MAIL_MAILER', 'gmail_api'),
 
     /*
     |--------------------------------------------------------------------------
@@ -95,6 +95,14 @@ return [
                 'postmark',
             ],
             'retry_after' => 60,
+        ],
+
+        'gmail_api' => [
+            'transport' => 'gmail_api',
+            'client_id' => env('GOOGLE_CLIENT_ID'),
+            'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+            'redirect_uri' => env('GOOGLE_REDIRECT_URI'),
+            'access_token_path' => env('GOOGLE_ACCESS_TOKEN_PATH'),
         ],
 
     ],
